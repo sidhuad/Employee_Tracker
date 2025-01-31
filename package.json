@@ -21,6 +21,7 @@
     "@types/express": "^4.17.21",
     "@types/inquirer": "^9.0.7",
     "@types/pg": "^8.11.6",
+    "console.table": "^0.10.0",
     "typescript": "^5.2.2"
   }
 }
