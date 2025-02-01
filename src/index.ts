@@ -22,19 +22,18 @@ class Cli{
             'Update an Employee Role',
             'Exit'
         ];
+        const promptObj = {
+            type:'list',
+            message:'Choose a Task:',
+            name:'action',
+            choices:ques
+        }
 
         // loopPrompt = true keeps prompting user for choices until they select exit which changes the value to false hence terminating the process.
         let loopPrompt = true;
         while (loopPrompt) {
             const data:inq = await inquirer
-            .prompt([
-                    {
-                        type:'list',
-                        message:'Choose a Task:',
-                        name:'action',
-                        choices:ques,
-                    }
-                ]);
+            .prompt([promptObj]);
                 if (data.action !== 'Exit') {
                     await crud.action(data.action);
                 } else {
