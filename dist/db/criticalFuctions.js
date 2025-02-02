@@ -1,28 +1,38 @@
-// async await keywords to be used from the start and till very end of the link to have it execute properly, if not used data will not persist even though its being displayed but it will vanish as soon as next prompt is used.ex: from prompt till data is fetched async await is being applied to every function and step which returns or fetches or logs that data.
 import inquirer from "inquirer";
 import { pool, connectToDb } from "./connection.js";
-import critFunc from "./criticalFuctions.js";
 await connectToDb();
-class httpVerbs {
-    async action(verb) {
-        await this.typeOfAction(verb);
+class CriticalFunc {
+    // addDepartment() method
+    async addDepartment() {
+        let loopPrompt = true;
+        const promptQues = {
+            type: "input",
+            name: "userInput",
+            message: "Please Enter Department Name: ",
+        };
+        while (loopPrompt) {
+            const answer = await inquirer.prompt([promptQues]);
+            if (answer.userInput && isNaN(answer.userInput)) {
+                const match = await pool.query(`SELECT name FROM department WHERE name = $1`, [answer.userInput]);
+                if (match.rowCount != 0) {
+                    console.log(`Department ${answer.userInput} already exists.`);
+                }
+                else {
+                    await pool.query(`INSERT INTO department(name) VALUES ($1)`, [
+                        `${answer.userInput}`,
+                    ]);
+                    console.log(`${answer.userInput} added to Department list`);
+                    const disNewDep = await pool.query(`SELECT * FROM department WHERE name = $1`, [answer.userInput]);
+                    console.table(disNewDep.rows);
+                }
+                loopPrompt = false;
+            }
+            else {
+                console.log(`Please Enter A Valid Name!`);
+            }
+        }
     }
-    async viewAllDep() {
-        const result = await pool.query(`SELECT id,name FROM department`);
-        console.table(result.rows);
-    }
-    async viewAllRoles() {
-        const result = await pool.query(`SELECT role.title AS job_title, role.id AS role_id, department.name AS department, role.salary AS Salary FROM role JOIN department ON role.department_id = department.id`);
-        console.table(result.rows);
-    }
-    async viewAllEmps() {
-        const result = await pool.query(`SELECT employee.id AS Employee_id, employee.first_name, employee.last_name, role.title, role.salary,department.name AS Department_name, manager.first_name || ' '|| manager.last_name AS Managers
-      FROM employee
-      JOIN role ON employee.role_id = role.id
-      JOIN department ON role.department_id = department.id
-      LEFT JOIN employee AS manager ON employee.manager_id = manager.id`);
-        console.table(result.rows);
-    }
+    // addRole() method
     async addRole() {
         let loopPrompt = true;
         const promptQues = [
@@ -84,6 +94,7 @@ class httpVerbs {
             loopPrompt = false;
         }
     }
+    // addEmployee() method
     async addEmp() {
         let loopPrompt = true;
         const promptQues = [
@@ -162,31 +173,6 @@ class httpVerbs {
             }
         }
     }
-    async typeOfAction(verb) {
-        switch (verb) {
-            case "View All Departments":
-                await this.viewAllDep();
-                break;
-            case "View All Roles":
-                await this.viewAllRoles();
-                break;
-            case "View All Employees":
-                await this.viewAllEmps();
-                break;
-            case "Add a Department":
-                await critFunc.addDepartment();
-                break;
-            case "Add a Role":
-                await this.addRole();
-                break;
-            case "Add an Employee":
-                await this.addEmp();
-                break;
-            case "Update an Employee Role":
-                console.log(`update an emp role`);
-                break;
-        }
-    }
 }
-const crud = new httpVerbs();
-export default crud;
+// exporting default instance of the class
+export default new CriticalFunc();

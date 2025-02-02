@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import crud from './db/CRUD.js';
+import crud from './db/simpleFunctions.js';
 
 // interface to keep data from being implicit any type
 interface inq {

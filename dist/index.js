@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import crud from './db/CRUD.js';
+import crud from './db/simpleFunctions.js';
 class Cli {
     // async function to pass action to CRUD.js with await to finish fetching sql queries
     async options() {
