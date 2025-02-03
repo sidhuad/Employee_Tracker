@@ -1,5 +1,6 @@
 // async await keywords to be used from the start and till very end of the link to have it execute properly, if not used data will not persist even though its being displayed but it will vanish as soon as next prompt is used.ex: from prompt till data is fetched async await is being applied to every function and step which returns or fetches or logs that data.
 
+import inquirer from "inquirer";
 import { pool, connectToDb } from "./connection.js";
 import "./criticalFuctions.js";
 import critFunc from "./criticalFuctions.js";
@@ -34,8 +35,65 @@ class httpVerbs {
     console.table(result.rows);
   }
 
+  private async viewEmpByManager(){
+    const managers = await pool.query(`SELECT employee.first_name ||' '|| employee.last_name AS Manager FROM employee WHERE employee.manager_id IS NULL`);
+    
+    const manArray:string [] = [];
+
+    managers.rows.forEach(element => {
+      manArray.push(element.manager);
+    })
+
+    const promptQues = {
+      type: "list",
+      name: "managers",
+      message: "Choose a Manager to view Employees: ",
+      choices: [...manArray]
+    }
+
+    const answer = await inquirer.prompt([promptQues]);
+
+    const firstName = answer.managers.split(' ')[0];
+    const lastName = answer.managers.split(' ')[1];
+    
+    const managerId = await pool.query(`SELECT id FROM employee WHERE first_name = $1 AND last_name = $2`,[`${firstName}`,`${lastName}`]);
+
+    const empByManagers = await pool.query(`SELECT employee.first_name ||' '||employee.last_name AS Employee_Names, role.title AS Title, manager.first_name ||' '|| manager.last_name AS Manager_Name FROM employee JOIN role ON employee.role_id = role.id JOIN employee AS manager ON employee.manager_id = manager.id WHERE employee.manager_id = $1`,[`${managerId.rows[0].id}`]);
+
+    if (empByManagers.rows.length == 0) {
+      console.log(`No Managers Found`);
+    } else {
+      console.table(empByManagers.rows);
+    }
+    
+  }
+
+  private async viewEmpByDep(){
+    const allDep = await pool.query(`SELECT name FROM department`);
+    const depArray:string[] = [];
+
+    allDep.rows.forEach(element => {
+      depArray.push(element.name);
+    });
+
+    const promptQues = {
+      type:'list',
+      name:'departments',
+      message:'View Employees By Departments: ',
+      choices:[... depArray]
+    }
+
+    const answer = await inquirer.prompt([promptQues]);
+
+    const depName = answer.departments;
+
+    const disp = await pool.query(`SELECT employee.first_name ||' '||employee.last_name AS Employee_Names, role.title AS Title FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id WHERE department.name = $1 `,[`${depName}`]);
+
+    console.table(disp.rows);
+    
+  }
   
-  
+
   private async typeOfAction(verb: string) {
     switch (verb) {
       case "View All Departments":
@@ -63,8 +121,27 @@ class httpVerbs {
         break;
 
       case "Update an Employee Role":
-        console.log(`update an emp role`);
+        await critFunc.updateEmpRole();
+        break;
+      
+      case "View Employee by Manager":
+        await this.viewEmpByManager();
+        break;
+      
+      case "View Employee by Department":
+        await this.viewEmpByDep();
+        break;
+      
+      case "Update Employee Managers":
+        await critFunc.updateEmpManager();
+        break;
 
+      case "Delete Departments, Roles, Empoloyees":
+        await critFunc.delDepRoleEmp();
+        break;
+
+      case "View Total Utilized Budget of a Department":
+        await critFunc.departmentBudget();
         break;
     }
   }

@@ -1,6 +1,6 @@
 import inquirer from "inquirer";
-import { pool, connectToDb } from "./connection.js";
-await connectToDb();
+import { pool } from "./connection.js";
+// await connectToDb();
 class CriticalFunc {
     // addDepartment() method
     async addDepartment() {
@@ -172,6 +172,188 @@ class CriticalFunc {
                 loopPrompt = false;
             }
         }
+    }
+    // Update Employee Role
+    async updateEmpRole() {
+        // user input for emp full name
+        const answer = await inquirer.prompt([
+            {
+                input: "input",
+                name: "fullName",
+                message: "Enter Employees Full Name: ",
+                validate: (input) => {
+                    if (input.trim() === "") {
+                        return `Invalid Input.`;
+                    }
+                    else {
+                        return true;
+                    }
+                },
+            },
+        ]);
+        const { fullName } = answer;
+        // spliting emp name into first and last resp
+        const firstName = fullName.split(" ")[0];
+        const lastName = fullName.split(" ")[1];
+        // displaying existing data for the emplyee searched before updating
+        const empInfo = await pool.query(`SELECT employee.id, employee.first_name, employee.last_name, role.title AS title FROM employee JOIN role ON employee.role_id = role.id WHERE first_name = $1 AND last_name = $2`, [`${firstName}`, `${lastName}`]);
+        console.table(empInfo.rows);
+        const empOldRole = empInfo.rows[0].title;
+        const empOldDepName = await pool.query(`SELECT department.name FROM department JOIN role ON role.department_id = department.id WHERE role.title = $1`, [`${empOldRole}`]);
+        console.log(empOldDepName.rows[0].name);
+        const updateRole = await inquirer.prompt([
+            {
+                input: "input",
+                name: "empNewRole",
+                message: "Enter Employees New Role Title: ",
+                validate: (input) => {
+                    if (input.trim() === "") {
+                        return `Invalid Input.`;
+                    }
+                    else {
+                        return true;
+                    }
+                },
+            },
+        ]);
+        const { empNewRole } = updateRole;
+        const empNewDepName = await pool.query(`SELECT department.name FROM department JOIN role ON role.department_id = department.id WHERE title = $1`, [`${empNewRole}`]);
+        const empNewRoleId = await pool.query("SELECT id FROM role WHERE title = $1", [`${empNewRole}`]);
+        // getting manager id to update when updating employee's role
+        const manId = await pool.query(`SELECT employee.manager_id FROM employee JOIN role ON employee.role_id = role.id WHERE role.title = $1`, [`${empNewRole}`]);
+        // console.log("new dep "+empNewDepName.rows[0].name+" old dep "+ empOldDepName.rows[0].name );
+        // console.log(empNewRoleId.rows[0].id);
+        if (empNewDepName.rows.length > 0) {
+            if (empOldDepName.rows[0].name === empNewDepName.rows[0].name) {
+                await pool.query(`UPDATE employee SET role_id = $1, manager_id = $2 WHERE first_name = $3 AND last_name = $4`, [
+                    `${empNewRoleId.rows[0].id}`,
+                    `${manId.rows[0].manager_id}`,
+                    `${firstName}`,
+                    `${lastName}`,
+                ]);
+                const newInfo = await pool.query(`SELECT employee.id, employee.first_name, employee.last_name, role.title FROM employee JOIN role ON employee.role_id = role.id WHERE first_name = $1 AND last_name = $2`, [`${firstName}`, `${lastName}`]);
+                console.log(`Update employee info`);
+                console.table(newInfo.rows);
+            }
+            else {
+                console.log(`Cannot set roles out of department`);
+            }
+        }
+        else {
+            console.log(`Role does not exist`);
+        }
+    }
+    // delete department or role or an employee.
+    async delDepRoleEmp() {
+        const depList = await pool.query("SELECT name FROM department");
+        const roleList = await pool.query("SELECT title FROM role");
+        const empList = await pool.query(`SELECT first_name ||' '|| last_name AS employees FROM employee`);
+        const depArray = [];
+        const roleArray = [];
+        const empArray = [];
+        depList.rows.forEach((element) => {
+            depArray.push(element.name);
+        });
+        roleList.rows.forEach((element) => {
+            roleArray.push(element.title);
+        });
+        empList.rows.forEach((element) => {
+            empArray.push(element.employees);
+        });
+        const answer = await inquirer.prompt([
+            {
+                type: "list",
+                name: "deleteCate",
+                message: "Choose a category to perform delete operation: ",
+                choices: ["Departments", "Roles", "Employees"],
+            },
+        ]);
+        if (answer.deleteCate === "Departments") {
+            const answer = await inquirer.prompt([
+                {
+                    type: "list",
+                    name: "deleteCate",
+                    message: "Choose a category to perform delete From: ",
+                    choices: [...depArray],
+                },
+            ]);
+            await pool.query(`DELETE FROM department WHERE name = $1`, [
+                `${answer.deleteCate}`,
+            ]);
+            console.log(`Department Deleted`);
+        }
+        if (answer.deleteCate === "Roles") {
+            const answer = await inquirer.prompt([
+                {
+                    type: "list",
+                    name: "deleteCate",
+                    message: "Choose a category to perform delete From: ",
+                    choices: [...roleArray],
+                },
+            ]);
+            await pool.query(`DELETE FROM role WHERE title = $1`, [
+                `${answer.deleteCate}`,
+            ]);
+            console.log(`Role Deleted`);
+        }
+        if (answer.deleteCate === "Employees") {
+            const answer = await inquirer.prompt([
+                {
+                    type: "list",
+                    name: "deleteCate",
+                    message: "Choose a category to perform delete From: ",
+                    choices: [...empArray],
+                },
+            ]);
+            const firstName = answer.deleteCate.split(" ")[0];
+            const lastName = answer.deleteCate.split(" ")[1];
+            await pool.query(`DELETE FROM employee WHERE first_name = $1 AND last_name = $2`, [`${firstName}`, `${lastName}`]);
+            console.log(`Employee Deleted`);
+        }
+    }
+    // Update employee manager function
+    async updateEmpManager() {
+        const employee = await pool.query(`SELECT first_name ||' '|| last_name AS employees FROM employee`);
+        const empArray = [];
+        employee.rows.forEach((element) => {
+            empArray.push(element.employees);
+        });
+        const answer = await inquirer.prompt([
+            {
+                type: "list",
+                name: "emp",
+                message: "Choose Employee to update their Manager: ",
+                choices: [...empArray],
+            },
+            {
+                type: "input",
+                name: "newMan",
+                message: "Enter the name of new Manager",
+            },
+        ]);
+        const empFirstName = answer.emp.split(' ')[0];
+        const empLastName = answer.emp.split(' ')[1];
+        const manFirstName = answer.newMan.split(' ')[0];
+        const manLastName = answer.newMan.split(' ')[1];
+        const getManId = await pool.query(`SELECT id FROM employee WHERE first_name = $1 AND last_name = $2`, [`${manFirstName}`, `${manLastName}`]);
+        await pool.query(`UPDATE employee SET manager_id = $1 WHERE first_name = $2 AND last_name = $3`, [`${getManId.rows[0].id}`, `${empFirstName}`, `${empLastName}`]);
+        console.log(`Manager id updated`);
+    }
+    // departmentBudget function()
+    async departmentBudget() {
+        const depList = await pool.query(`SELECT name FROM department`);
+        const depArray = [];
+        depList.rows.forEach(element => {
+            depArray.push(element.name);
+        });
+        const answer = await inquirer.prompt([{
+                type: 'list',
+                name: 'depName',
+                message: 'Choose a Department Name to see the budget.',
+                choices: [...depArray]
+            }]);
+        const sumOfDep = await pool.query(`SELECT department.name, SUM(role.salary) AS total_budget FROM role JOIN department ON role.department_id = department.id WHERE department.name = $1`, [`${answer.depName}`]);
+        console.table(sumOfDep.rows);
     }
 }
 // exporting default instance of the class

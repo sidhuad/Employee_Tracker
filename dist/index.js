@@ -8,10 +8,15 @@ class Cli {
             'View All Departments',
             'View All Roles',
             'View All Employees',
+            'View Employee by Manager',
+            'View Employee by Department',
             'Add a Department',
             'Add a Role',
             'Add an Employee',
             'Update an Employee Role',
+            'Update Employee Managers',
+            'Delete Departments, Roles, Empoloyees',
+            'View Total Utilized Budget of a Department',
             'Exit'
         ];
         const promptObj = {
