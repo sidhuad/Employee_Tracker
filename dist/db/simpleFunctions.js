@@ -25,9 +25,11 @@ class httpVerbs {
         console.table(result.rows);
     }
     async viewEmpByManager() {
-        const managers = await pool.query(`SELECT employee.first_name ||' '|| employee.last_name AS Manager FROM employee WHERE employee.manager_id IS NULL`);
+        // const managersNullId = await pool.query(`SELECT employee.first_name ||' '|| employee.last_name AS Manager FROM employee WHERE employee.manager_id IS NULL`);
+        const managerNotNull = await pool.query(`SELECT DISTINCT manager.first_name ||' '|| manager.last_name AS manager FROM employee JOIN employee AS manager ON employee.manager_id = manager.id WHERE employee.manager_id IS NOT NULL `);
+        // console.table(managerNotNull.rows);
         const manArray = [];
-        managers.rows.forEach(element => {
+        managerNotNull.rows.forEach(element => {
             manArray.push(element.manager);
         });
         const promptQues = {
@@ -48,6 +50,7 @@ class httpVerbs {
             console.table(empByManagers.rows);
         }
     }
+    // view all employees by department
     async viewEmpByDep() {
         const allDep = await pool.query(`SELECT name FROM department`);
         const depArray = [];
@@ -97,7 +100,8 @@ class httpVerbs {
             case "Update Employee Managers":
                 await critFunc.updateEmpManager();
                 break;
-            case "Delete Departments, Roles, Empoloyees":
+            case "Delete Departments, Roles, Employees":
+                console.log(`its working`);
                 await critFunc.delDepRoleEmp();
                 break;
             case "View Total Utilized Budget of a Department":

@@ -245,70 +245,69 @@ class CriticalFunc {
     }
     // delete department or role or an employee.
     async delDepRoleEmp() {
-        const depList = await pool.query("SELECT name FROM department");
-        const roleList = await pool.query("SELECT title FROM role");
-        const empList = await pool.query(`SELECT first_name ||' '|| last_name AS employees FROM employee`);
-        const depArray = [];
-        const roleArray = [];
-        const empArray = [];
-        depList.rows.forEach((element) => {
-            depArray.push(element.name);
-        });
-        roleList.rows.forEach((element) => {
-            roleArray.push(element.title);
-        });
-        empList.rows.forEach((element) => {
-            empArray.push(element.employees);
-        });
-        const answer = await inquirer.prompt([
-            {
-                type: "list",
-                name: "deleteCate",
-                message: "Choose a category to perform delete operation: ",
-                choices: ["Departments", "Roles", "Employees"],
-            },
-        ]);
-        if (answer.deleteCate === "Departments") {
+        try {
+            const depList = await pool.query("SELECT name FROM department");
+            const roleList = await pool.query("SELECT title FROM role");
+            const empList = await pool.query(`SELECT first_name ||' '|| last_name AS employees FROM employee`);
+            const depArray = depList.rows.map(element => element.name);
+            const roleArray = roleList.rows.map(element => element.title);
+            const empArray = empList.rows.map(element => element.employees);
+            // console.log(depArray);
+            // console.log(roleArray);
+            // console.log(empArray);
             const answer = await inquirer.prompt([
                 {
                     type: "list",
                     name: "deleteCate",
-                    message: "Choose a category to perform delete From: ",
-                    choices: [...depArray],
+                    message: "Choose a category to perform delete operation: ",
+                    choices: ["Departments", "Roles", "Employees"],
                 },
             ]);
-            await pool.query(`DELETE FROM department WHERE name = $1`, [
-                `${answer.deleteCate}`,
-            ]);
-            console.log(`Department Deleted`);
+            if (answer.deleteCate === "Departments") {
+                const answer = await inquirer.prompt([
+                    {
+                        type: "list",
+                        name: "deleteCate",
+                        message: "Choose a category to perform delete From: ",
+                        choices: [...depArray],
+                    },
+                ]);
+                await pool.query(`DELETE FROM department WHERE name = $1`, [
+                    `${answer.deleteCate}`,
+                ]);
+                console.log(`Department Deleted`);
+            }
+            if (answer.deleteCate === "Roles") {
+                const answer = await inquirer.prompt([
+                    {
+                        type: "list",
+                        name: "deleteCate",
+                        message: "Choose a category to perform delete From: ",
+                        choices: [...roleArray],
+                    },
+                ]);
+                await pool.query(`DELETE FROM role WHERE title = $1`, [
+                    `${answer.deleteCate}`,
+                ]);
+                console.log(`Role Deleted`);
+            }
+            if (answer.deleteCate === "Employees") {
+                const answer = await inquirer.prompt([
+                    {
+                        type: "list",
+                        name: "deleteCate",
+                        message: "Choose a category to perform delete From: ",
+                        choices: [...empArray],
+                    },
+                ]);
+                const firstName = answer.deleteCate.split(" ")[0];
+                const lastName = answer.deleteCate.split(" ")[1];
+                await pool.query(`DELETE FROM employee WHERE first_name = $1 AND last_name = $2`, [`${firstName}`, `${lastName}`]);
+                console.log(`Employee Deleted`);
+            }
         }
-        if (answer.deleteCate === "Roles") {
-            const answer = await inquirer.prompt([
-                {
-                    type: "list",
-                    name: "deleteCate",
-                    message: "Choose a category to perform delete From: ",
-                    choices: [...roleArray],
-                },
-            ]);
-            await pool.query(`DELETE FROM role WHERE title = $1`, [
-                `${answer.deleteCate}`,
-            ]);
-            console.log(`Role Deleted`);
-        }
-        if (answer.deleteCate === "Employees") {
-            const answer = await inquirer.prompt([
-                {
-                    type: "list",
-                    name: "deleteCate",
-                    message: "Choose a category to perform delete From: ",
-                    choices: [...empArray],
-                },
-            ]);
-            const firstName = answer.deleteCate.split(" ")[0];
-            const lastName = answer.deleteCate.split(" ")[1];
-            await pool.query(`DELETE FROM employee WHERE first_name = $1 AND last_name = $2`, [`${firstName}`, `${lastName}`]);
-            console.log(`Employee Deleted`);
+        catch (error) {
+            console.error(error);
         }
     }
     // Update employee manager function
@@ -352,7 +351,7 @@ class CriticalFunc {
                 message: 'Choose a Department Name to see the budget.',
                 choices: [...depArray]
             }]);
-        const sumOfDep = await pool.query(`SELECT department.name, SUM(role.salary) AS total_budget FROM role JOIN department ON role.department_id = department.id WHERE department.name = $1`, [`${answer.depName}`]);
+        const sumOfDep = await pool.query(`SELECT SUM(role.salary) AS total_budget FROM role JOIN department ON role.department_id = department.id WHERE department.name = $1`, [`${answer.depName}`]);
         console.table(sumOfDep.rows);
     }
 }

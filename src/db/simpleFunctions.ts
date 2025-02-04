@@ -36,11 +36,14 @@ class httpVerbs {
   }
 
   private async viewEmpByManager(){
-    const managers = await pool.query(`SELECT employee.first_name ||' '|| employee.last_name AS Manager FROM employee WHERE employee.manager_id IS NULL`);
+    // const managersNullId = await pool.query(`SELECT employee.first_name ||' '|| employee.last_name AS Manager FROM employee WHERE employee.manager_id IS NULL`);
     
+    const managerNotNull = await pool.query(`SELECT DISTINCT manager.first_name ||' '|| manager.last_name AS manager FROM employee JOIN employee AS manager ON employee.manager_id = manager.id WHERE employee.manager_id IS NOT NULL `);
+
+    // console.table(managerNotNull.rows);
     const manArray:string [] = [];
 
-    managers.rows.forEach(element => {
+    managerNotNull.rows.forEach(element => {
       manArray.push(element.manager);
     })
 
@@ -68,6 +71,7 @@ class httpVerbs {
     
   }
 
+  // view all employees by department
   private async viewEmpByDep(){
     const allDep = await pool.query(`SELECT name FROM department`);
     const depArray:string[] = [];
@@ -136,7 +140,7 @@ class httpVerbs {
         await critFunc.updateEmpManager();
         break;
 
-      case "Delete Departments, Roles, Empoloyees":
+      case "Delete Departments, Roles, Employees":
         await critFunc.delDepRoleEmp();
         break;
 

@@ -20,4 +20,6 @@
 
 -- SELECT department.name FROM department JOIN role ON role.department_id = department.id WHERE title = 'Marketing Associate'
 
-SELECT employee.manager_id, employee.first_name FROM employee JOIN role ON employee.role_id = role.id WHERE role.title = 'Developer';
+-- SELECT employee.manager_id, employee.first_name FROM employee JOIN role ON employee.role_id = role.id WHERE role.title = 'Developer';
+
+SELECT DISTINCT manager_id, first_name FROM employee WHERE manager_id IS NOT NULL;

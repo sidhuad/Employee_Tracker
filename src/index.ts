@@ -23,7 +23,7 @@ class Cli{
             'Add an Employee',
             'Update an Employee Role',
             'Update Employee Managers',
-            'Delete Departments, Roles, Empoloyees',
+            'Delete Departments, Roles, Employees',
             'View Total Utilized Budget of a Department',
             'Exit'
         ];
