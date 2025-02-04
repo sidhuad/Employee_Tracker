@@ -1,184 +1,116 @@
-# 10 SQL: Employee Tracker
 
-## Your Task
+# Employee Tracker
 
-Developers frequently have to create interfaces that allow non-developers to easily view and interact with information stored in databases. These interfaces are called **content management systems (CMS)**. Your assignment this week is to build a command-line application from scratch to manage a company's employee database, using Node.js, Inquirer, and PostgreSQL.
+![Static Badge](https://img.shields.io/badge/License-MIT-green)
 
-Because this Challenge will require the use of the `Inquirer` package, ensure that you install and use Inquirer version 8.2.4. To do so, use the following command in your project folder: `npm i inquirer@8.2.4`.
+## Description
 
-Because this application won’t be deployed, you’ll also need to create a walkthrough video that demonstrates its functionality and all of the following acceptance criteria being met. You’ll need to submit a link to the video and add it to the README of your project.
+### Motivation 
+The motivation behind building the Employee Tracker was to create a solution for managing and keeping track of employee records, roles, and departments in an organization. As businesses grow, keeping track of employees manually can become complex, error-prone, and time-consuming. This project provides a user-friendly and efficient way to manage employee information, their roles, and department associations in a streamlined manner.
+### Why build This Project 
+This project was built to simplify the management of employee data by offering an easy-to-use interface for HR teams or managers. It allows you to:
+- Add, update, and delete employee records.
+- View employees by department or role. 
+- Manage roles and departments efficiently.
+- Track relationships between employees and their managers.
+Additionally, it demonstrates how to implement PostgreSQL for data storage, how to use TypeScript for better code maintainability, and how to structure an interactive CLI-based application with Inquirer.
+### What problem's did it solve
+- Complex Employee Management: Manually keeping track of employees, departments, and roles is prone to errors and inefficiency. The Employee Tracker automates this and provides clear, organized management.
+- Lack of Interaction in Traditional Systems: Many existing HR management tools are either too complex or require a lot of manual work. This CLI-based solution is simple, intuitive, and reduces administrative overhead.
+- Database Management: The system eliminates the risk of data redundancy by storing employee, role, and department information in a relational database, with well-defined relationships between them.
+### Lesson's Learned
+- Database Relationships: I learned how to model relationships in a relational database—how to create proper foreign keys between tables like employees, roles, and departments.
+- TypeScript Best Practices: Working with TypeScript taught me about strong typing and the importance of defining interfaces for structured data, improving code quality and maintainability.
+- CLI Interaction: Using Inquirer to create dynamic, interactive command-line prompts was a valuable experience in building CLI tools with user-friendly interfaces.
+- PostgreSQL Setup: I became more familiar with configuring PostgreSQL, establishing connections, and running SQL queries to create, read, update, and delete data.
+### What makes your project stand-out 
+- CLI functionality: It’s not just a web app—this is an interactive command-line tool, providing a fast and responsive way to manage data.
+- Real-world Application: The system is designed around managing real-world business entities, making it useful for any organization that wants to track employee roles and departments.
+- Relational Database Design: It efficiently handles relationships between employees, roles, and departments using PostgreSQL, demonstrating a practical use of database management.
 
-## User Story
+## Table of Contents
 
-```md
-AS A business owner
-I WANT to be able to view and manage the departments, roles, and employees in my company
-SO THAT I can organize and plan my business
+- [Installation](#installation)
+- [Usage](#usage)
+- [Credits](#credits)
+- [License](#license)
+- [Features](#features)
+- [How to Contribute](#how-to-contribute)
+- [Tests](#tests)
+- [Questions](#questions)
+- [Links](#links)
+
+## Installation
+- Clone the repository
+```
+git clone https://github.com/sidhuad/employee_tracker.git 
+cd employee_tracker
+```
+- Install the necessay dependencies
+```
+npm install
+```
+- Set up environment variables
+```
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=yourusername
+DB_PASSWORD=yourpassword
+DB_NAME=employee_tracker
+```
+- Create and set up the PostgreSQL database (ensure PostgreSQL is running on your machine)
+```
+Run the provided SQL scripts to create the necessary tables (roles, employees, departments).
+Optionally, you can use a tool like pgAdmin to interact with your database.
+```
+- Run the application
+```
+npm run start
 ```
 
-## Acceptance Criteria
-
-```md
-GIVEN a command-line application that accepts user input
-WHEN I start the application
-THEN I am presented with the following options: view all departments, view all roles, view all employees, add a department, add a role, add an employee, and update an employee role
-WHEN I choose to view all departments
-THEN I am presented with a formatted table showing department names and department ids
-WHEN I choose to view all roles
-THEN I am presented with the job title, role id, the department that role belongs to, and the salary for that role
-WHEN I choose to view all employees
-THEN I am presented with a formatted table showing employee data, including employee ids, first names, last names, job titles, departments, salaries, and managers that the employees report to
-WHEN I choose to add a department
-THEN I am prompted to enter the name of the department and that department is added to the database
-WHEN I choose to add a role
-THEN I am prompted to enter the name, salary, and department for the role and that role is added to the database
-WHEN I choose to add an employee
-THEN I am prompted to enter the employee’s first name, last name, role, and manager, and that employee is added to the database
-WHEN I choose to update an employee role
-THEN I am prompted to select an employee to update and their new role and this information is updated in the database 
-```
-
-## Mock-Up
-
-The following video shows an example of the application being used from the command line:
-
-[![A video thumbnail shows the command-line employee management application with a play button overlaying the view.](./Assets/12-sql-homework-video-thumbnail.png)](https://2u-20.wistia.com/medias/2lnle7xnpk)
-
-## Getting Started
-
-This Challenge will require a video submission. Refer to the [Fullstack Blog Video Submission Guide](https://coding-boot-camp.github.io/full-stack/computer-literacy/video-submission-guide) for additional guidance on creating a video.
-
-You’ll need to use the [pg package](https://www.npmjs.com/package/pg) to connect to your PostgreSQL database and perform queries, and the [Inquirer package](https://www.npmjs.com/package/inquirer/v/8.2.4) to interact with the user via the command line.
-
-**Important**: You will be committing a file that contains your database credentials. Make sure that your PostgreSQL password is not used for any other personal accounts, because it will be visible on GitHub. In upcoming lessons, you will learn how to better secure this password, or you can start researching npm packages now that could help you.
-
-You might also want to make your queries asynchronous. You can make your queries asynchronous by using the [native async/await keywords](https://node-postgres.com/guides/async-express).
-
-Design the database schema as shown in the following image:
-
-![Database schema includes tables labeled “employee,” role,” and “department.”](./Assets/100-sql-challenge-ERD.png)
-
-As the image illustrates, your schema should contain the following three tables:
-
-* `department`
-
-  * `id`: `SERIAL PRIMARY KEY`
-
-  * `name`: `VARCHAR(30) UNIQUE NOT NULL` to hold department name
-
-* `role`
-
-  * `id`: `SERIAL PRIMARY KEY`
-
-  * `title`: `VARCHAR(30) UNIQUE NOT NULL` to hold role title
-
-  * `salary`: `DECIMAL NOT NULL` to hold role salary
-
-  * `department_id`: `INTEGER NOT NULL` to hold reference to department role belongs to
-
-* `employee`
-
-  * `id`: `SERIAL PRIMARY KEY`
-
-  * `first_name`: `VARCHAR(30) NOT NULL` to hold employee first name
-
-  * `last_name`: `VARCHAR(30) NOT NULL` to hold employee last name
-
-  * `role_id`: `INTEGER NOT NULL` to hold reference to employee role
-
-  * `manager_id`: `INTEGER` to hold reference to another employee that is the manager of the current employee (`null` if the employee has no manager)
-
-You might want to use a separate file that contains functions for performing specific SQL queries you'll need to use. A constructor function or class could be helpful for organizing these. You might also want to include a `seeds.sql` file to pre-populate your database, making the development of individual features much easier.
-
-## Bonus
-
-Try to add some additional functionality to your application, such as the ability to do the following:
-
-* Update employee managers.
-
-* View employees by manager.
-
-* View employees by department.
-
-* Delete departments, roles, and employees.
-
-* View the total utilized budget of a department&mdash;in other words, the combined salaries of all employees in that department.
-
-## Grading Requirements
-
-> **Note**: If a Challenge assignment submission is marked as “0”, it is considered incomplete and will not count towards your graduation requirements. Examples of incomplete submissions include the following:
->
-> * A repository that has no code
->
-> * A repository that includes a unique name but nothing else
->
-> * A repository that includes only a README file but nothing else
->
-> * A repository that only includes starter code
-
-This Challenge is graded based on the following criteria:
-
-### Deliverables: 10%
-
-* Your GitHub repository containing your application code.
-
-### Walkthrough Video: 27%
-
-* A walkthrough video that demonstrates the functionality of the employee tracker must be submitted, and a link to the video should be included in your README file.
-
-* The walkthrough video must show all of the technical acceptance criteria being met.
-
-* The walkthrough video must demonstrate how a user would invoke the application from the command line.
-
-* The walkthrough video must demonstrate a functional menu with the options outlined in the acceptance criteria.
-
-### Technical Acceptance Criteria: 40%
-
-* Satisfies all of the preceding acceptance criteria plus the following:
-
-  * Uses the [Inquirer package](https://www.npmjs.com/package/inquirer/v/8.2.4).
-
-  * Uses the [pg package](https://www.npmjs.com/package/pg) to connect to a PostgreSQL database.
-
-* Follows the table schema outlined in the Challenge instructions.
-
-### Repository Quality: 13%
-
-* Repository has a unique name.
-
-* Repository follows best practices for file structure and naming conventions.
-
-* Repository follows best practices for class/id naming conventions, indentation, quality comments, etc.
-
-* Repository contains multiple descriptive commit messages.
-
-* Repository contains a high-quality README with description and a link to a walkthrough video.
-
-### Application Quality 10%
-
-* The application user experience is intuitive and easy to navigate.
-
-### Bonus
-
-Fulfilling any of the following can add up to 20 points to your grade. Note that the highest grade you can achieve is still 100:
-
-* Application allows users to update employee managers (2 points).
-
-* Application allows users to view employees by manager (2 points).
-
-* Application allows users to view employees by department (2 points).
-
-* Application allows users to delete departments, roles, and employees (2 points for each).
-
-* Application allows users to view the total utilized budget of a department&mdash;in other words, the combined salaries of all employees in that department (8 points).
-
-## Review
-
-You are required to submit BOTH of the following for review:
-
-* A walkthrough video demonstrating the functionality of the application.
-
-* The URL of the GitHub repository, with a unique name and a README describing the project.
-
----
-© 2024 edX Boot Camps LLC. Confidential and Proprietary. All Rights Reserved.
+## Usage
+Once the app is running, you can interact with the system through a series of prompts:
+- **View employees:** View employees by their department or role.
+- **Add new records:** Add new employees, roles, or departments to the system.
+- **Update employee records:** Modify roles, departments, or other details of an existing employee.
+- **Delete records:** Remove employees, roles, or departments from the database.
+The app uses a CLI interface, so it guides you through different operations using prompts for interaction.
+
+## Credits
+- **PostgreSQL:** Used for database storage and management.
+- **Inquirer.js:** Used for creating the interactive command-line interface.
+- **TypeScript:** Used for structured and typed code.
+- **dotenv:** Used for storing environment variables like database connection details.
+
+## License
+A short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code. https://choosealicense.com/licenses/mit/
+
+## Features
+- **View Employees by Department/Role:** Quickly filter employees based on their department or role.
+- **Add New Employees, Roles, and Departments:** Easily input new data into the system.
+- **Update Employee Information:** Edit existing employee details such as role or department.
+- **Delete Records:** Remove any employee, role, or department from the system.
+- **Interactive CLI:** Provides an intuitive, user-friendly command-line interface for managing employees.
+
+## How to Contribute
+1. Fork the repository.
+2. Create a new branch (git checkout -b feature/your-feature).
+3. Make your changes and commit them (git commit -am 'Add your feature').
+4. Push to your branch (git push origin feature/your-feature).
+5. Open a pull request and describe your changes.
+Feel free to suggest improvements or new features, and I'll review them as soon as possible!
+
+## Tests
+To ensure the app is functioning correctly, I recommend testing each of the features, such as:
+- Viewing employee records.
+- Adding and editing employee information.
+- Removing records from the database.
+- Checking the database integrity after operations.
+You can write unit tests for database operations using a testing library like Jest or Mocha if you wish to further improve the project.
+
+## Questions
+- For Further Questions and Bug reports Please reach out to me at Github [sidhuad](https://github.com/sidhuad) or email me at adarshsidhu83@gmail.com
+
+## Links
+[Video demo](https://www.loom.com/share/1655db2f1e9d4558be999fe24385728a?sid=cbbea2b1-a1a1-4b1d-8065-17c0d6fa1046)
+[Github Repo](https://github.com/sidhuad/Employee_Tracker)

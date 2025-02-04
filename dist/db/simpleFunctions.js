@@ -101,7 +101,6 @@ class httpVerbs {
                 await critFunc.updateEmpManager();
                 break;
             case "Delete Departments, Roles, Employees":
-                console.log(`its working`);
                 await critFunc.delDepRoleEmp();
                 break;
             case "View Total Utilized Budget of a Department":
