@@ -197,6 +197,11 @@ class CriticalFunc {
           [`${manFirstName}`, `${manLastName}`]
         );
 
+        // if manager doesnt exist log that manager is not an employee in the system
+        if (manResult.rows.length === 0) {
+          console.log('Manager Does not exist in the system');
+          return;
+        }
         // getting role id by using and matching role title.
         const empRole = answer.role.trim();
         const roleResult = await pool.query(
@@ -249,6 +254,11 @@ class CriticalFunc {
       `SELECT employee.id, employee.first_name, employee.last_name, role.title AS title FROM employee JOIN role ON employee.role_id = role.id WHERE first_name = $1 AND last_name = $2`,
       [`${firstName}`, `${lastName}`]
     );
+
+    if (empInfo.rows.length === 0) {
+      console.log(`Employee does not exist`);
+      return;
+    }
     console.table(empInfo.rows);
     const empOldRole = empInfo.rows[0].title;
 
@@ -434,6 +444,10 @@ class CriticalFunc {
 
     const getManId = await pool.query(`SELECT id FROM employee WHERE first_name = $1 AND last_name = $2`,[`${manFirstName}`,`${manLastName}`]);
 
+    if (getManId.rows.length === 0) {
+      console.log(`Manager does not exist in the system.`);
+      return;      
+    }
     await pool.query(`UPDATE employee SET manager_id = $1 WHERE first_name = $2 AND last_name = $3`,[`${getManId.rows[0].id}`,`${empFirstName}`,`${empLastName}`]);
 
     console.log(`Manager id updated`);
